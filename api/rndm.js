@@ -1,20 +1,14 @@
-const fs = require('fs');
-const path = require('path');
+import data from '../data.json';
 
-module.exports = async (req, res) => {
-  const { category } = req.query;
+export default function handler(req, res) {
+  const category = req.query.category;
 
-  if (!category) {
-    return res.status(400).json({ error: 'Missing category' });
+  if (!category || !data[category] || data[category].length === 0) {
+    return res.status(404).json({ error: 'No videos found in this category' });
   }
 
-  const filePath = path.join(__dirname, '..', 'data.json');
-  const data = JSON.parse(fs.readFileSync(filePath));
+  const randomIndex = Math.floor(Math.random() * data[category].length);
+  const randomVideo = data[category][randomIndex];
 
-  if (!data[category] || data[category].length === 0) {
-    return res.status(404).json({ error: `No videos found in ${category}` });
-  }
-
-  const rndmVideo = data[category][Math.floor(Math.random() * data[category].length)];
-  res.json({ video: rndmVideo });
-};
+  res.json({ videoUrl: randomVideo });
+}
