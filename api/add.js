@@ -1,19 +1,16 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import data from '../data.json';
 
-module.exports = async (req, res) => {
-  const { category, video } = req.query;
+export default async function handler(req, res) {
+  if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
 
-  if (!category || !video) {
-    return res.status(400).json({ error: 'Missing category or video URL' });
-  }
-
-  const filePath = path.join(__dirname, '..', 'data.json');
-  const data = JSON.parse(fs.readFileSync(filePath));
+  const { category, videoUrl } = req.body;
+  if (!category || !videoUrl) return res.status(400).json({ error: 'Missing category or videoUrl' });
 
   if (!data[category]) data[category] = [];
-  data[category].push(video);
 
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-  res.json({ success: true, message: `Added to ${category}`, total: data[category].length });
-};
+  data[category].push(videoUrl);
+
+  fs.writeFileSync('data.json', JSON.stringify(data, null, 2));
+  res.json({ success: true, message: `Added to ${category}` });
+}
