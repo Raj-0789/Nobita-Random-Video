@@ -1,16 +1,18 @@
-import fs from 'fs';
-import data from '../data.json';
+const express = require("express");
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
+const data = require("./data.json");
 
-  const { category, videoUrl } = req.body;
-  if (!category || !videoUrl) return res.status(400).json({ error: 'Missing category or videoUrl' });
+app.get("/", (req, res) => {
+  res.send("Nobita Random Video API is live!");
+});
 
-  if (!data[category]) data[category] = [];
+app.get("/random", (req, res) => {
+  const randomItem = data[Math.floor(Math.random() * data.length)];
+  res.json({ video: randomItem });
+});
 
-  data[category].push(videoUrl);
-
-  fs.writeFileSync('data.json', JSON.stringify(data, null, 2));
-  res.json({ success: true, message: `Added to ${category}` });
-}
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
+});
